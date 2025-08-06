@@ -13,7 +13,7 @@ interface UpdateServiceParams {
   price?: number
 }
 
-export const ServiceService = {
+export const Service = {
   create: async ({ title, description, price, userId }: CreateServiceParams) => {
     return await prisma.service.create({
       data: {
@@ -67,7 +67,6 @@ export const ServiceService = {
   },
 
   update: async (id: string, data: UpdateServiceParams, userId: string) => {
-    // Verificar se o serviço pertence ao usuário
     const service = await prisma.service.findFirst({
       where: { id, userId }
     })
@@ -92,7 +91,6 @@ export const ServiceService = {
   },
 
   delete: async (id: string, userId: string) => {
-    // Verificar se o serviço pertence ao usuário
     const service = await prisma.service.findFirst({
       where: { id, userId }
     })
@@ -107,4 +105,4 @@ export const ServiceService = {
 
     return true
   }
-} 
+}

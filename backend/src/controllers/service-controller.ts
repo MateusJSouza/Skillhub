@@ -1,5 +1,5 @@
 import { Request, Response } from "express"
-import { ServiceService } from "../services/service"
+import { Service } from "../services/service"
 
 export const createService = async (req: Request, res: Response) => {
   try {
@@ -14,7 +14,7 @@ export const createService = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Usuário não autenticado' })
     }
 
-    const service = await ServiceService.create({ title, description, price, userId })
+    const service = await Service.create({ title, description, price, userId })
 
     return res.status(201).json(service)
   } catch (err) {
@@ -25,7 +25,7 @@ export const createService = async (req: Request, res: Response) => {
 
 export const listServices = async (req: Request, res: Response) => {
   try {
-    const services = await ServiceService.findAll()
+    const services = await Service.findAll()
     return res.json(services)
   } catch (error) {
     console.error('Erro ao listar serviços:', error)
@@ -36,7 +36,7 @@ export const listServices = async (req: Request, res: Response) => {
 export const getServiceById = async (req: Request, res: Response) => {
   try {
     const { id } = req.params
-    const service = await ServiceService.findById(id)
+    const service = await Service.findById(id)
 
     if (!service) {
       return res.status(404).json({ error: 'Serviço não encontrado' })
@@ -59,7 +59,7 @@ export const updateService = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Usuário não autenticado' })
     }
 
-    const service = await ServiceService.update(id, { title, description, price }, userId)
+    const service = await Service.update(id, { title, description, price }, userId)
 
     if (!service) {
       return res.status(404).json({ error: 'Serviço não encontrado' })
@@ -81,7 +81,7 @@ export const deleteService = async (req: Request, res: Response) => {
       return res.status(401).json({ error: 'Usuário não autenticado' })
     }
 
-    const deleted = await ServiceService.delete(id, userId)
+    const deleted = await Service.delete(id, userId)
 
     if (!deleted) {
       return res.status(404).json({ error: 'Serviço não encontrado' })
