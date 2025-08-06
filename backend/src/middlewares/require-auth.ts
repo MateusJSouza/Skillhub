@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 import prisma from '../config/prisma';
+import { UserRole } from '../utils/user-roles';
 
 export const requireAuth = async (req: Request, res: Response, next: NextFunction) => {
   const authHeader = req.headers.authorization;
@@ -12,7 +13,11 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
   const token = authHeader.split(' ')[1];
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as { id: string };
+    const decoded = jwt.verify(token, process.env.JWT_SECRET as string) as {
+      id: string;
+      role: UserRole;
+      email: string;
+    };
 
     const user = await prisma.user.findUnique({ where: { id: decoded.id } });
 
@@ -20,8 +25,12 @@ export const requireAuth = async (req: Request, res: Response, next: NextFunctio
       return res.status(401).json({ error: 'Usuário não encontrado.' });
     }
 
-    // Adiciona o usuário à requisição (tiparemos isso corretamente em seguida)
-    req.user = user;
+    // Aqui a mágica do TypeScript: isso atribui req.user do tipo Express.User definido no global.d.ts
+    req.user = {
+      id: user.id,
+      role: user.role as UserRole,
+      email: user.email,
+    };
 
     next();
   } catch (err) {

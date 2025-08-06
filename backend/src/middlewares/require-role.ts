@@ -1,14 +1,11 @@
-import type { Request, Response, NextFunction } from 'express'
-import { Role } from '../generated/prisma'
+import { Request, Response, NextFunction } from 'express';
+import { UserRole } from '../utils/user-roles';
 
-export const requireRole = (roles: Role[]) => {
+export const requireRole = (roles: UserRole[]) => {
   return (req: Request, res: Response, next: NextFunction) => {
     if (!req.user || !roles.includes(req.user.role)) {
-      return res
-        .status(403)
-        .json({ error: 'Acesso negado. Permissão insuficiente.' })
+      return res.status(403).json({ error: 'Acesso negado. Permissão insuficiente.' });
     }
-
-    next()
-  }
-}
+    next();
+  };
+};
