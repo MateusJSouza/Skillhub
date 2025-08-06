@@ -8,6 +8,8 @@ import adminRoutes from './routes/admin-routes'
 import userRoutes from './routes/user-route'
 import clientRoutes from './routes/client-routes'
 import providerRoutes from './routes/provider-routes'
+import serviceRoutes from './routes/service-routes'
+import appointmentRoutes from './routes/appointment-routes'
 
 dotenv.config()
 
@@ -23,6 +25,8 @@ app.use('/admin', adminRoutes)
 app.use('/api/user', userRoutes)
 app.use('/api/client', clientRoutes)
 app.use('/api/provider', providerRoutes)
+app.use('/api/services', serviceRoutes)
+app.use('/api/appointments', appointmentRoutes)
 
 app.get('/', (req, res) => {
   res.send('SkillHub API está no ar!')
