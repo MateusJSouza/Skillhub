@@ -6,9 +6,9 @@ export const createService = async (req: Request, res: Response) => {
     const { title, description, price } = req.body
     const userId = req.user?.id
 
-    if (!title || !description || !price) {
-      return res.status(400).json({ error: 'Título, descrição e preço são obrigatórios' })
-    }
+    if (!title || !description || typeof price !== 'number' || isNaN(price)) {
+      return res.status(400).json({ error: 'Título, descrição e preço válidos são obrigatórios' })
+    }    
 
     if (!userId) {
       return res.status(401).json({ error: 'Usuário não autenticado' })
