@@ -1,48 +1,78 @@
-import { Request, Response } from "express"
+import { Request, Response } from "express";
 import { AppointmentService } from "../services/appointment-service";
+import prisma from "../config/prisma";
 
 export const createAppointment = async (req: Request, res: Response) => {
   try {
     const { date, serviceId } = req.body;
-    const userId = req.user?.id
+    const userId = req.user?.id;
 
     if (!date || !serviceId) {
-      return res.status(400).json({ error: 'Data e serviço do agendamento são obrigatórios' })
+      return res.status(400).json({ error: 'Data e serviço do agendamento são obrigatórios' });
     }
 
     if (!userId) {
-      return res.status(401).json({ error: 'Usuário não autenticado' })
+      return res.status(401).json({ error: 'Usuário não autenticado' });
     }
 
-    const appointment = await AppointmentService.create({ userId, date, serviceId })
+    const appointment = await AppointmentService.create({ userId, date, serviceId });
 
-    return res.status(201).json(appointment)
+    return res.status(201).json(appointment);
   } catch (err) {
     console.error('Erro ao criar agendamento:', err);
-    
+
     if (err instanceof Error) {
+      if (err.message.includes('conflito')) {
+        return res.status(409).json({ error: err.message });  // conflito de horário
+      }
       if (err.message.includes('não encontrado')) {
-        return res.status(404).json({ error: err.message })
+        return res.status(404).json({ error: err.message });
+      }
+      if (err.message.includes('inválida')) {
+        return res.status(400).json({ error: err.message });
       }
     }
-    
-    return res.status(500).json({ error: 'Erro interno ao criar agendamento.' })
+
+    return res.status(500).json({ error: 'Erro interno ao criar agendamento.' });
   }
-}
+};
 
 export const listAppointment = async (req: Request, res: Response) => {
   try {
     const userId = req.user?.id;
-    
+
     if (!userId) {
-      return res.status(401).json({ error: 'Usuário não autenticado' })
+      return res.status(401).json({ error: 'Usuário não autenticado' });
     }
-    
+
     const appointments = await AppointmentService.findByUser(userId);
-    
+
     return res.json(appointments);
   } catch (error) {
     console.error('Erro ao listar agendamentos:', error);
     return res.status(500).json({ error: 'Erro interno ao listar agendamentos.' });
   }
 };
+
+export const listProviderAppointments = async (req: Request, res: Response) => {
+  try {
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return res.status(401).json({ error: 'Usuário não autenticado.' })
+    }
+
+    // Buscar serviços do provider
+    const services = await prisma.service.findMany({
+      where: { userId },
+      select: { id: true }
+    });
+
+    const appointments = await AppointmentService.findByProvider(userId)
+    
+    return res.json(appointments)
+  } catch (err) {
+    console.error('Erro ao listar agendamentos do provider:', err)
+    return res.status(500).json({ error: "Erro interno ao listar agendamentos." })
+  }
+}
